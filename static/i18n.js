@@ -1006,6 +1006,7 @@ const LOCALES = {
     tab_memory: 'Memory',
     tab_workspaces: 'Spaces',
     tab_profiles: 'Profiles',
+    tab_meridian_team: 'Meridian Team',
     tab_kanban: 'Kanban',
     kanban_board: 'Board',
     kanban_visible_tasks: '{0} visible tasks',

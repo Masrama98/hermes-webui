@@ -7358,3 +7358,98 @@ html[data-conversation-outline="enabled"] #outlineToggleBtn:not([hidden]){displa
 /* Settings field highlight (mirrors msg-question-highlight / _highlightQuestionRow pattern) */
 .settings-field-highlight { animation: settings-field-pulse 1.6s ease-out; }
 @keyframes settings-field-pulse { 0% { box-shadow: 0 0 0 0 var(--focus-ring); } 35% { box-shadow: 0 0 0 4px var(--focus-ring); } 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); } }
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MERIDIAN EDITION — custom branding (fork: Masrama98/hermes-webui)
+   Accent gradient matches the app mark: #08EBF1 → #3889FD
+   ══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --meridian-1: #08EBF1;
+  --meridian-2: #3889FD;
+  --meridian-grad: linear-gradient(90deg, var(--meridian-1), var(--meridian-2));
+}
+
+.app-titlebar-brand {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #04121F;
+  background: var(--meridian-grad);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.app-titlebar { border-bottom: 1px solid transparent; }
+.app-titlebar::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: var(--meridian-grad);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+/* ── Meridian Team panel ── */
+.meridian-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px 4px;
+}
+.meridian-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: var(--surface-subtle, transparent);
+}
+.meridian-chip b { color: var(--text); font-weight: 700; }
+.meridian-chip--active { border-color: var(--meridian-2); color: var(--meridian-2); }
+.meridian-chip--active b { color: var(--meridian-2); }
+.meridian-chip--sync { margin-left: auto; }
+
+.meridian-card {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border2, var(--border));
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 6px 0;
+  background: var(--surface, transparent);
+}
+.meridian-card--active { border-left-color: var(--meridian-1); }
+.meridian-card--idle { border-left-color: var(--meridian-2); }
+.meridian-card--empty { opacity: 0.72; }
+
+.meridian-card-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.meridian-name { font-weight: 600; color: var(--text); }
+.meridian-handle { font-size: 11px; color: var(--muted); }
+.meridian-status {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.meridian-status--active { color: #17A673; }
+.meridian-status--idle { color: var(--meridian-2); }
+.meridian-status--empty { color: var(--muted); }
+
+.meridian-role { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.meridian-stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: 11px; color: var(--muted); }
+.meridian-stat b { color: var(--text); }
+.meridian-stat--muted { opacity: 0.85; }
+.meridian-empty, .meridian-error { padding: 16px 12px; font-size: 12px; color: var(--muted); }
+.meridian-error { color: #D14343; }

@@ -43,9 +43,9 @@ let _logsSeverityFilter = 'all';
 const APP_TITLEBAR_KEYS = {
   chat: 'tab_chat', tasks: 'tab_tasks', skills: 'tab_skills',
   memory: 'tab_memory', workspaces: 'tab_workspaces',
-  profiles: 'tab_profiles', todos: 'tab_todos', insights: 'tab_insights', logs: 'tab_logs', settings: 'tab_settings',
+  profiles: 'tab_profiles', 'meridian-team': 'tab_meridian_team', todos: 'tab_todos', insights: 'tab_insights', logs: 'tab_logs', settings: 'tab_settings',
 };
-const MAIN_VIEW_PANELS = ['settings','skills','memory','tasks','kanban','workspaces','profiles','insights','logs','plugin'];
+const MAIN_VIEW_PANELS = ['settings','skills','memory','tasks','kanban','workspaces','profiles','meridian-team','insights','logs','plugin'];
 const MAIN_VIEW_SIDEBAR_PANEL_FALLBACKS = { plugin: 'settings' };
 
 /**
@@ -457,6 +457,7 @@ async function switchPanel(name, opts = {}) {
   if (nextPanel === 'memory') await loadMemory();
   if (nextPanel === 'workspaces') await loadWorkspacesPanel();
   if (nextPanel === 'profiles') await loadProfilesPanel();
+  if (nextPanel === 'meridian-team') await loadMeridianTeam();
   if (nextPanel === 'todos') loadTodos();
   if (nextPanel === 'insights') await loadInsights();
   if (nextPanel === 'logs') await loadLogs();
@@ -13640,4 +13641,74 @@ function updateNotificationPermissionStatus(){
     btn.setAttribute('aria-disabled', granted?'true':'false');
   }
   if(btnWrap) btnWrap.title=label;
+}
+
+
+// ── Meridian Team panel ─────────────────────────────────────────────────────
+// Reads the read-only roster endpoint and renders one card per Meridian agent.
+const _MERIDIAN_STATUS_TEXT = { active: 'Active', idle: 'Idle', empty: 'Empty' };
+
+function _meridianEsc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function _meridianTime(ts) {
+  if (!ts) return '—';
+  try {
+    return new Date(ts * 1000).toLocaleString(undefined,
+      { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch (err) { return '—'; }
+}
+
+function _meridianCardHtml(row) {
+  const status = ['active', 'idle', 'empty'].indexOf(row.status) >= 0 ? row.status : 'empty';
+  return '<div class="meridian-card meridian-card--' + status + '">' +
+    '<div class="meridian-card-head">' +
+      '<span class="meridian-name">' + _meridianEsc(row.name || row.profile) + '</span>' +
+      '<span class="meridian-handle">' + _meridianEsc(row.profile) + '</span>' +
+      '<span class="meridian-status meridian-status--' + status + '">' +
+        _meridianEsc(_MERIDIAN_STATUS_TEXT[status]) + '</span>' +
+    '</div>' +
+    '<div class="meridian-role">' + _meridianEsc(row.role || '') + '</div>' +
+    '<div class="meridian-stats">' +
+      '<span class="meridian-stat"><b>' + (row.sessions || 0) + '</b> sesi</span>' +
+      '<span class="meridian-stat"><b>' + (row.memories || 0) + '</b> memori</span>' +
+      '<span class="meridian-stat"><b>' + (row.skills || 0) + '</b> skill</span>' +
+      '<span class="meridian-stat meridian-stat--muted">' + _meridianEsc(row.model || 'model default') + '</span>' +
+      '<span class="meridian-stat meridian-stat--muted">' + _meridianTime(row.last_activity) + '</span>' +
+    '</div>' +
+  '</div>';
+}
+
+async function loadMeridianTeam(forceRefresh) {
+  const wrap = document.getElementById('meridianTeamPanel');
+  const summary = document.getElementById('meridianTeamSummary');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="color:var(--muted);font-size:12px" data-i18n="loading">Loading...</div>';
+  if (typeof applyI18n === 'function') applyI18n(wrap);
+  try {
+    const res = await fetch('/api/meridian/team-status', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const rows = Array.isArray(data.profiles) ? data.profiles : [];
+    if (!rows.length) {
+      if (summary) summary.innerHTML = '';
+      wrap.innerHTML = '<div class="meridian-empty">Belum ada agent di roster Meridian.</div>';
+      return;
+    }
+    if (summary) {
+      summary.innerHTML =
+        '<span class="meridian-chip"><b>' + (data.total || rows.length) + '</b> agent</span>' +
+        '<span class="meridian-chip meridian-chip--active"><b>' + (data.active || 0) + '</b> active</span>' +
+        '<span class="meridian-chip"><b>' + (data.idle || 0) + '</b> idle</span>' +
+        '<span class="meridian-chip meridian-chip--sync">ops sync ' + _meridianTime(data.last_sync) + '</span>';
+    }
+    wrap.innerHTML = rows.map(_meridianCardHtml).join('');
+  } catch (err) {
+    if (summary) summary.innerHTML = '';
+    wrap.innerHTML = '<div class="meridian-error">Gagal memuat status tim: ' +
+      _meridianEsc(err && err.message ? err.message : err) + '</div>';
+  }
 }

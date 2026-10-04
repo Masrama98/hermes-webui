@@ -14659,6 +14659,13 @@ def handle_get(handler, parsed) -> bool:
         j(handler, dashboard_probe.get_dashboard_status())
         return True
 
+    # ── Meridian Team Panel ──
+    if parsed.path == "/api/meridian/team-status":
+        from api import meridian
+
+        j(handler, meridian.get_meridian_team_status())
+        return True
+
     if parsed.path == "/api/dashboard/config":
         from api import dashboard_probe
 
